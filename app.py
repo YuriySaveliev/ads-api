@@ -6,57 +6,74 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-TODOS = {
-    'todo1': {'task': 'build an API'},
-    'todo2': {'task': '?????'},
-    'todo3': {'task': 'profit!'},
-}
+ADS = [
+    {
+        'id': 1,
+        'title': 'GeForce 1060', 
+        'description': 'GDDR5', 
+        'price': 150,
+        'bids': [
+            (100, "2019-01-08 22:17:54"),
+            (10, "2019-11-08 22:17:54")
+        ]
+    },
+    {
+        'id': 2,
+        'title': 'Bike', 
+        'description': 'Yamaha', 
+        'price': 5000,
+        'bids': [
+            (4000, "2017-01-08 22:17:54"),
+            (4500, "2018-11-08 22:17:54")
+        ]
+    },
+    {
+        'id': 3,
+        'title': 'Ticket', 
+        'description': 'Ticket to the ZOO', 
+        'price': 50,
+        'bids': [
+            (50, "2009-01-08 22:17:54"),
+            (10, "2009-11-08 22:17:54")
+        ]
+    }
+]
 
-def abort_if_todo_doesnt_exist(todo_id):
-    if todo_id not in TODOS:
-        abort(404, message="Todo {} doesn't exist".format(todo_id))
+def abort_if_ad_doesnt_exist(ad_id):
+    if ad_id not in ADS:
+        abort(404, message="Ad {} doesn't exist".format(ad_id))
 
 parser = reqparse.RequestParser()
 parser.add_argument('task')
 
+class Ad(Resource):
+    def get(self, ad_id):
+        abort_if_ad_doesnt_exist(ad_id)
+        return ADS[ad_id]
 
-# Todo
-# shows a single todo item and lets you delete a todo item
-class Todo(Resource):
-    def get(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        return TODOS[todo_id]
-
-    def delete(self, todo_id):
-        abort_if_todo_doesnt_exist(todo_id)
-        del TODOS[todo_id]
+    def delete(self, ad_id):
+        abort_if_ad_doesnt_exist(ad_id)
+        del ADS[ad_id]
         return '', 204
 
-    def put(self, todo_id):
+    def put(self, ad_id):
         args = parser.parse_args()
         task = {'task': args['task']}
-        TODOS[todo_id] = task
+        ADS[ad_id] = task
         return task, 201
 
-
-# TodoList
-# shows a list of all todos, and lets you POST to add new tasks
-class TodoList(Resource):
+class AdList(Resource):
     def get(self):
-        return TODOS
+        return ADS
 
     def post(self):
         args = parser.parse_args()
-        todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-        todo_id = 'todo%i' % todo_id
-        TODOS[todo_id] = {'task': args['task']}
-        return TODOS[todo_id], 201
+        ad_id = max(ADS.keys()) + 1
+        ADS[ad_id] = {'task': args['task']}
+        return ADS[ad_id], 201
 
-##
-## Actually setup the Api resource routing here
-##
-api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<todo_id>')
+api.add_resource(AdList, '/ads')
+api.add_resource(Ad, '/ads/<id_id>')
 
 
 if __name__ == '__main__':
