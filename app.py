@@ -40,27 +40,65 @@ ADS = [
 ]
 
 def abort_if_ad_doesnt_exist(ad_id):
-    if ad_id not in ADS:
+    isAdExist = False
+
+    for item in ADS:
+        if item['id'] == int(ad_id):
+            isAdExist = True
+    
+    if (not isAdExist):
         abort(404, message="Ad {} doesn't exist".format(ad_id))
 
 parser = reqparse.RequestParser()
-parser.add_argument('task')
+parser.add_argument('id')
+parser.add_argument('title')
+parser.add_argument('description')
+parser.add_argument('price')
+parser.add_argument('bids')
 
 class Ad(Resource):
     def get(self, ad_id):
+        searcheableAd = {}
+
         abort_if_ad_doesnt_exist(ad_id)
-        return ADS[ad_id]
+
+        for item in ADS:
+            if item['id'] == int(ad_id):
+                searcheableAd = item
+
+        return searcheableAd     
 
     def delete(self, ad_id):
+        newAdsList = []
+        global ADS
+
         abort_if_ad_doesnt_exist(ad_id)
-        del ADS[ad_id]
+
+        for item in ADS:
+            if item['id'] != int(ad_id):
+                newAdsList.append(item)
+
+        ADS = newAdsList[:]
         return '', 204
 
     def put(self, ad_id):
         args = parser.parse_args()
-        task = {'task': args['task']}
-        ADS[ad_id] = task
-        return task, 201
+        ad = {
+            "id": args['id'],
+            "title": args['title'], 
+            "description": args['description'], 
+            "price": args['price'],
+            "bids": args['bids'] or []
+        }
+
+        for item in ADS:
+            if item['id'] == int(ad_id):
+                item["title"] = args['title'] 
+                item["description"] = args['description'] 
+                item["price"] = args['price']
+                item["bids"] = args['bids'] or []
+
+                return item, 201
 
 class AdList(Resource):
     def get(self):
@@ -68,13 +106,19 @@ class AdList(Resource):
 
     def post(self):
         args = parser.parse_args()
-        ad_id = max(ADS.keys()) + 1
-        ADS[ad_id] = {'task': args['task']}
-        return ADS[ad_id], 201
+        ad_id = len(ADS) + 1
+        ADS.append({
+            "id": ad_id,
+            "title": args['title'], 
+            "description": args['description'], 
+            "price": args['price'],
+            "bids": args['bids'] or []
+        })
+
+        return ADS[ad_id - 1], 201
 
 api.add_resource(AdList, '/ads')
-api.add_resource(Ad, '/ads/<id_id>')
-
+api.add_resource(Ad, '/ads/<ad_id>')
 
 if __name__ == '__main__':
     app.run(debug=True)
