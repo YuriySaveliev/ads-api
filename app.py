@@ -20,13 +20,6 @@ def abort_if_ad_doesnt_exist(ad_id):
     if (not isAdExist):
         abort(404, message="Ad {} doesn't exist".format(ad_id))
 
-parser = reqparse.RequestParser()
-parser.add_argument('id')
-parser.add_argument('title')
-parser.add_argument('description')
-parser.add_argument('price')
-parser.add_argument('bids')
-
 api.add_resource(AdList, '/ads')
 api.add_resource(Ad, '/ads/<ad_id>')
 

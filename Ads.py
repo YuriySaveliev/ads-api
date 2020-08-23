@@ -21,22 +21,32 @@ class AdList(Resource):
             }
 
             ADS.append(dict(ad))
-        
 
         connection.commit()
-        connection.close()
 
         return ADS
 
     def post(self):
-        args = parser.parse_args()
-        ad_id = len(ADS) + 1
-        ADS.append({
-            "id": ad_id,
-            "title": args['title'], 
-            "description": args['description'], 
-            "price": args['price'],
-            "bids": args['bids'] or []
-        })
+        connection = sqlite3.connect('ads.db')
+        cursor = connection.cursor()
 
-        return ADS[ad_id - 1], 201
+        parser = reqparse.RequestParser()
+
+        parser.add_argument('id')
+        parser.add_argument('title')
+        parser.add_argument('description')
+        parser.add_argument('price')
+        parser.add_argument('bids')
+
+        args = parser.parse_args()
+        ad = (
+            args['title'], 
+            args['description'], 
+            args['price'],
+            args['bids']
+        )
+
+        cursor.execute("INSERT INTO ads(title, description, price, bids) VALUES(?,?,?,?)", ad)
+        connection.commit()
+
+        return cursor.lastrowid, 201
