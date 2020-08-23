@@ -14,16 +14,20 @@ class Ad(Resource):
         return searcheableAd     
 
     def delete(self, ad_id):
-        newAdsList = []
-        global ADS
+        connection = sqlite3.connect('ads.db')
+        cursor = connection.cursor()
 
-        abort_if_ad_doesnt_exist(ad_id)
+        parser = reqparse.RequestParser()
 
-        for item in ADS:
-            if item['id'] != int(ad_id):
-                newAdsList.append(item)
+        parser.add_argument('id')
 
-        ADS = newAdsList[:]
+        args = parser.parse_args()
+        
+        cursor.execute("DELETE FROM ads where id=?", (ad_id,))
+        connection.commit()
+
+        #abort_if_ad_doesnt_exist(ad_id)
+
         return '', 204
 
     def put(self, ad_id):
