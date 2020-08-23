@@ -3,25 +3,30 @@ import sqlite3
 
 class Ad(Resource):
     def get(self, ad_id):
-        searcheableAd = {}
+        connection = sqlite3.connect('ads.db')
+        cursor = connection.cursor()
+        
+        cursor.execute("SELECT * FROM ads where id=?", (ad_id,))
+        connection.commit()
+        row = cursor.fetchone()
 
-        abort_if_ad_doesnt_exist(ad_id)
+        #abort_if_ad_doesnt_exist(ad_id)
 
-        for item in ADS:
-            if item['id'] == int(ad_id):
-                searcheableAd = item
+        ad = {
+            'id': row[0],
+            'title': row[1], 
+            'description': row[2], 
+            'price': row[3],
+            'bids': row[4]
+        }
 
-        return searcheableAd     
+        return ad
 
     def delete(self, ad_id):
         connection = sqlite3.connect('ads.db')
         cursor = connection.cursor()
 
-        parser = reqparse.RequestParser()
-
         parser.add_argument('id')
-
-        args = parser.parse_args()
         
         cursor.execute("DELETE FROM ads where id=?", (ad_id,))
         connection.commit()
