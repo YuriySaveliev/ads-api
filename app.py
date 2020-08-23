@@ -1,43 +1,35 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 from flask_cors import CORS
+import sqlite3
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-ADS = [
-    {
-        'id': 1,
-        'title': 'GeForce 1060', 
-        'description': 'GDDR5', 
-        'price': 150,
-        'bids': [
-            (100, "2019-01-08 22:17:54"),
-            (10, "2019-11-08 22:17:54")
-        ]
-    },
-    {
-        'id': 2,
-        'title': 'Bike', 
-        'description': 'Yamaha', 
-        'price': 5000,
-        'bids': [
-            (4000, "2017-01-08 22:17:54"),
-            (4500, "2018-11-08 22:17:54")
-        ]
-    },
-    {
-        'id': 3,
-        'title': 'Ticket', 
-        'description': 'Ticket to the ZOO', 
-        'price': 50,
-        'bids': [
-            (50, "2009-01-08 22:17:54"),
-            (10, "2009-11-08 22:17:54")
-        ]
+connection = sqlite3.connect('ads.db')
+cursor = connection.cursor()
+"""cursor.execute("CREATE TABLE ads(id integer not null primary key, title text, description text, price integer, bids integer)")
+cursor.execute("INSERT INTO ads VALUES (1, 'GeForce 1060', 'GDDR5', 150, 100)")
+cursor.execute("INSERT INTO ads VALUES (2, 'Bike', 'Yamaha', 5000, 4000)")
+cursor.execute("INSERT INTO ads VALUES (3, 'Ticket', 'Ticket to the ZOO', 50, 50)")"""
+cursor.execute("SELECT * FROM ads")
+rows = cursor.fetchall()
+
+ADS = []
+for row in rows:
+    ad = {
+        'id': row[0],
+        'title': row[1], 
+        'description': row[2], 
+        'price': row[3],
+        'bids': row[4]
     }
-]
+    
+    ADS.append(dict(ad))
+
+connection.commit()
+connection.close()
 
 def abort_if_ad_doesnt_exist(ad_id):
     isAdExist = False
