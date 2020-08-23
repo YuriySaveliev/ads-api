@@ -7,29 +7,10 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-connection = sqlite3.connect('ads.db')
-cursor = connection.cursor()
 """cursor.execute("CREATE TABLE ads(id integer not null primary key, title text, description text, price integer, bids integer)")
 cursor.execute("INSERT INTO ads VALUES (1, 'GeForce 1060', 'GDDR5', 150, 100)")
 cursor.execute("INSERT INTO ads VALUES (2, 'Bike', 'Yamaha', 5000, 4000)")
 cursor.execute("INSERT INTO ads VALUES (3, 'Ticket', 'Ticket to the ZOO', 50, 50)")"""
-cursor.execute("SELECT * FROM ads")
-rows = cursor.fetchall()
-
-ADS = []
-for row in rows:
-    ad = {
-        'id': row[0],
-        'title': row[1], 
-        'description': row[2], 
-        'price': row[3],
-        'bids': row[4]
-    }
-    
-    ADS.append(dict(ad))
-
-connection.commit()
-connection.close()
 
 def abort_if_ad_doesnt_exist(ad_id):
     isAdExist = False
@@ -94,6 +75,29 @@ class Ad(Resource):
 
 class AdList(Resource):
     def get(self):
+        connection = sqlite3.connect('ads.db')
+        cursor = connection.cursor()
+
+        ADS = []
+        
+        cursor.execute("SELECT * FROM ads")
+        rows = cursor.fetchall()
+
+        for row in rows:
+            ad = {
+                'id': row[0],
+                'title': row[1], 
+                'description': row[2], 
+                'price': row[3],
+                'bids': row[4]
+            }
+            
+            ADS.append(dict(ad))
+        
+
+        connection.commit()
+        connection.close()
+
         return ADS
 
     def post(self):
