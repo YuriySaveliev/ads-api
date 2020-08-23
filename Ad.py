@@ -36,20 +36,37 @@ class Ad(Resource):
         return '', 204
 
     def put(self, ad_id):
+        connection = sqlite3.connect('ads.db')
+        cursor = connection.cursor()
+
+        parser = reqparse.RequestParser()
+
+        parser.add_argument('id')
+        parser.add_argument('title')
+        parser.add_argument('description')
+        parser.add_argument('price')
+        parser.add_argument('bids')
+
         args = parser.parse_args()
+        ad = (
+            args['title'], 
+            args['description'], 
+            args['price'],
+            args['bids'],
+            ad_id
+        )
+    
+        #abort_if_ad_doesnt_exist(ad_id)
+        
+        cursor.execute("UPDATE ads SET title=?, description=?, price=?, bids=? where id=?", ad)
+        connection.commit()
+
         ad = {
-            "id": args['id'],
+            "id": ad_id,
             "title": args['title'], 
             "description": args['description'], 
             "price": args['price'],
-            "bids": args['bids'] or []
+            "bids": args['bids']
         }
 
-        for item in ADS:
-            if item['id'] == int(ad_id):
-                item["title"] = args['title'] 
-                item["description"] = args['description'] 
-                item["price"] = args['price']
-                item["bids"] = args['bids'] or []
-
-                return item, 201
+        return ad, 201       
