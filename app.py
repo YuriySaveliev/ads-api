@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect
 from flask_restful import reqparse, abort, Api, Resource
 from flask_cors import CORS
 import sqlite3
@@ -22,6 +22,10 @@ def abort_if_ad_doesnt_exist(ad_id):
 
 api.add_resource(AdList, '/ads')
 api.add_resource(Ad, '/ads/<ad_id>')
+
+@app.route('/')
+def index():
+    return redirect('/ads')
 
 if __name__ == '__main__':
     app.run(debug=True)
