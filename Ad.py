@@ -17,7 +17,8 @@ class Ad(Resource):
             'title': row[1], 
             'description': row[2], 
             'price': row[3],
-            'bids': row[4]
+            'bids': row[4],
+            'create_date': row[5]
         }
 
         return ad
@@ -46,7 +47,7 @@ class Ad(Resource):
         parser.add_argument('description')
         parser.add_argument('price')
         parser.add_argument('bids')
-
+        
         args = parser.parse_args()
         ad = (
             args['title'], 
@@ -66,7 +67,8 @@ class Ad(Resource):
             "title": args['title'], 
             "description": args['description'], 
             "price": args['price'],
-            "bids": args['bids']
+            "bids": args['bids'],
+            "create_date": args['create_date']
         }
 
         return ad, 201       

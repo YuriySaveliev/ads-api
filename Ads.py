@@ -1,5 +1,6 @@
 from flask_restful import reqparse, abort, Api, Resource
 import sqlite3
+import datetime
 
 class AdList(Resource):
     def get(self):
@@ -17,7 +18,8 @@ class AdList(Resource):
                 'title': row[1], 
                 'description': row[2], 
                 'price': row[3],
-                'bids': row[4]
+                'bids': row[4],
+                'create_date': row[5]
             }
 
             ADS.append(dict(ad))
@@ -43,10 +45,11 @@ class AdList(Resource):
             args['title'], 
             args['description'], 
             args['price'],
-            args['bids']
+            args['bids'],
+            datetime.datetime.now()
         )
 
-        cursor.execute("INSERT INTO ads(title, description, price, bids) VALUES(?,?,?,?)", ad)
+        cursor.execute("INSERT INTO ads(title, description, price, bids, create_date) VALUES(?,?,?,?,?)", ad)
         connection.commit()
 
         return cursor.lastrowid, 201
