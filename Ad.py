@@ -1,7 +1,33 @@
 from flask_restful import reqparse, abort, Api, Resource
+from flask_httpauth import HTTPBasicAuth
+from flask import make_response, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
+auth = HTTPBasicAuth()
+
+users = {
+    'regular': generate_password_hash('P@ssword1')
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and check_password_hash(users.get(username), password):
+        return username
+
+@auth.get_password
+def get_password(username):
+    if username == 'jurassic':
+        return 'Welcome1!'
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+
 class Ad(Resource):
+    decorators = [auth.login_required]
+
     def get(self, ad_id):
         connection = sqlite3.connect('ads.db')
         cursor = connection.cursor()

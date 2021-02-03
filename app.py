@@ -1,4 +1,4 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, jsonify
 from flask_restful import reqparse, abort, Api, Resource
 from flask_cors import CORS
 import sqlite3
@@ -26,6 +26,10 @@ api.add_resource(Ad, '/ads/<ad_id>')
 @app.route('/')
 def index():
     return redirect('/ads')
+
+@app.route('/login')
+def login_user():
+    return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
     app.run(debug=True)
