@@ -18,7 +18,7 @@ def unauthorized():
     return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 class AdList(Resource):
-    decorators = [auth.login_required]
+    #decorators = [auth.login_required]
 
     def get(self):
         connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
