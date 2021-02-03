@@ -1,7 +1,25 @@
 from flask_restful import reqparse, abort, Api, Resource
+from flask_httpauth import HTTPBasicAuth
+from flask import make_response, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import datetime
+
+auth = HTTPBasicAuth()
+
+@auth.get_password
+def get_password(username):
+    if username == 'jurassic':
+        return 'Welcome1!'
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 class AdList(Resource):
+    decorators = [auth.login_required]
+
     def get(self):
         connection = sqlite3.connect('ads.db')
         cursor = connection.cursor()
@@ -17,7 +35,8 @@ class AdList(Resource):
                 'title': row[1], 
                 'description': row[2], 
                 'price': row[3],
-                'bids': row[4]
+                'bids': row[4],
+                'create_date': row[5]
             }
 
             ADS.append(dict(ad))
@@ -43,10 +62,11 @@ class AdList(Resource):
             args['title'], 
             args['description'], 
             args['price'],
-            args['bids']
+            args['bids'],
+            datetime.datetime.now()
         )
 
-        cursor.execute("INSERT INTO ads(title, description, price, bids) VALUES(?,?,?,?)", ad)
+        cursor.execute("INSERT INTO ads(title, description, price, bids, create_date) VALUES(?,?,?,?,?)", ad)
         connection.commit()
 
         return cursor.lastrowid, 201
