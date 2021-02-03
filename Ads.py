@@ -21,7 +21,7 @@ class AdList(Resource):
     decorators = [auth.login_required]
 
     def get(self):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
 
         ADS = []
@@ -46,7 +46,7 @@ class AdList(Resource):
         return ADS
 
     def post(self):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()

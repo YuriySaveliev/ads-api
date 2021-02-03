@@ -29,7 +29,7 @@ class Ad(Resource):
     decorators = [auth.login_required]
 
     def get(self, ad_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
         
         cursor.execute("SELECT * FROM ads where id=?", (ad_id,))
@@ -50,8 +50,10 @@ class Ad(Resource):
         return ad
 
     def delete(self, ad_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
+
+        parser = reqparse.RequestParser()
 
         parser.add_argument('id')
         
@@ -63,7 +65,7 @@ class Ad(Resource):
         return '', 204
 
     def put(self, ad_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
