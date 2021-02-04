@@ -26,7 +26,7 @@ def unauthorized():
     return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 class Ad(Resource):
-    decorators = [auth.login_required]
+    #decorators = [auth.login_required]
 
     def get(self, ad_id):
         connection = sqlite3.connect('ads.db')
@@ -44,7 +44,8 @@ class Ad(Resource):
             'description': row[2], 
             'price': row[3],
             'bids': row[4],
-            'create_date': row[5]
+            'create_date': row[5],
+            'image_url': row[6]
         }
 
         return ad
@@ -73,6 +74,7 @@ class Ad(Resource):
         parser.add_argument('description')
         parser.add_argument('price')
         parser.add_argument('bids')
+        parser.add_argument('image_url')
         
         args = parser.parse_args()
         ad = (
@@ -80,12 +82,13 @@ class Ad(Resource):
             args['description'], 
             args['price'],
             args['bids'],
+            args['image_url'],
             ad_id
         )
     
         #abort_if_ad_doesnt_exist(ad_id)
         
-        cursor.execute("UPDATE ads SET title=?, description=?, price=?, bids=? where id=?", ad)
+        cursor.execute("UPDATE ads SET title=?, description=?, price=?, bids=?, image_url=? where id=?", ad)
         connection.commit()
 
         ad = {
@@ -94,7 +97,8 @@ class Ad(Resource):
             "description": args['description'], 
             "price": args['price'],
             "bids": args['bids'],
-            "create_date": args['create_date']
+            "create_date": args['create_date'],
+            "image_url": args['image_url'],
         }
 
         return ad, 201       
