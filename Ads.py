@@ -36,7 +36,8 @@ class AdList(Resource):
                 'description': row[2], 
                 'price': row[3],
                 'bids': row[4],
-                'create_date': row[5]
+                'create_date': row[5],
+                'image_url': row[6]
             }
 
             ADS.append(dict(ad))
@@ -51,11 +52,11 @@ class AdList(Resource):
 
         parser = reqparse.RequestParser()
 
-        parser.add_argument('id')
         parser.add_argument('title')
         parser.add_argument('description')
         parser.add_argument('price')
         parser.add_argument('bids')
+        parser.add_argument('image_url')
 
         args = parser.parse_args()
         ad = (
@@ -63,10 +64,11 @@ class AdList(Resource):
             args['description'], 
             args['price'],
             args['bids'],
-            datetime.datetime.now()
+            datetime.datetime.now(),
+            args['image_url'],
         )
 
-        cursor.execute("INSERT INTO ads(title, description, price, bids, create_date) VALUES(?,?,?,?,?)", ad)
+        cursor.execute("INSERT INTO ads(title, description, price, bids, create_date, image_url) VALUES(?,?,?,?,?,?)", ad)
         connection.commit()
 
         return cursor.lastrowid, 201
