@@ -6,28 +6,7 @@ import sqlite3
 
 auth = HTTPBasicAuth()
 
-users = {
-    'regular': generate_password_hash('P@ssword1')
-}
-
-@auth.verify_password
-def verify_password(username, password):
-    if username in users and check_password_hash(users.get(username), password):
-        return username
-
-@auth.get_password
-def get_password(username):
-    if username == 'jurassic':
-        return 'Welcome1!'
-    return None
-
-@auth.error_handler
-def unauthorized():
-    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
-
 class Ad(Resource):
-    #decorators = [auth.login_required]
-
     def get(self, ad_id):
         connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
         cursor = connection.cursor()
@@ -35,8 +14,6 @@ class Ad(Resource):
         cursor.execute("SELECT * FROM ads where id=?", (ad_id,))
         connection.commit()
         row = cursor.fetchone()
-
-        #abort_if_ad_doesnt_exist(ad_id)
 
         ad = {
             'id': row[0],
@@ -55,13 +32,10 @@ class Ad(Resource):
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
-
         parser.add_argument('id')
         
         cursor.execute("DELETE FROM ads where id=?", (ad_id,))
         connection.commit()
-
-        #abort_if_ad_doesnt_exist(ad_id)
 
         return '', 204
 
@@ -87,8 +61,6 @@ class Ad(Resource):
             args['image_url'],
             ad_id
         )
-    
-        #abort_if_ad_doesnt_exist(ad_id)
         
         cursor.execute("UPDATE ads SET title=?, description=?, price=?, bids=?, image_url=? where id=?", ad)
         connection.commit()

@@ -1,4 +1,4 @@
-from flask import Flask, redirect, jsonify
+from flask import Flask, redirect, jsonify, request, make_response
 from flask_restful import reqparse, abort, Api, Resource
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,6 +6,7 @@ import sqlite3
 
 from Ad import Ad
 from Ads import AdList
+from Categories import Categories
 
 app = Flask(__name__)
 CORS(app)
@@ -23,14 +24,40 @@ def abort_if_ad_doesnt_exist(ad_id):
 
 api.add_resource(AdList, '/ads')
 api.add_resource(Ad, '/ads/<ad_id>')
+api.add_resource(Categories, '/ads/categories')
 
 @app.route('/')
 def index():
     return redirect('/ads')
 
-@app.route('/login')
+@app.route('/login', methods = ['POST'])
 def login_user():
-    return jsonify({'status': 'ok'})
+    name = request.json.get('name')
+    password = request.json.get('password')
+
+    if name is None or password is None:
+        abort(400)
+    
+    connection = sqlite3.connect('ads.db')
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM users where name=?", (name,))
+    connection.commit()
+    row = cursor.fetchone()
+
+    if row is None:
+        return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+    
+    user = {
+        'id': row[0],
+        'name': row[1],
+        'password': row[2]
+    }
+
+    if check_password_hash(user.get('password'), password):
+        return jsonify({'status': 'ok', 'user_id': user.get('id'), 'name': user.get('name')})
+    else:
+        return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 if __name__ == '__main__':
     app.run(debug=True)
