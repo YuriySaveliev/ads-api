@@ -7,19 +7,31 @@ import datetime
 
 auth = HTTPBasicAuth()
 
-@auth.get_password
-def get_password(username):
-    if username == 'jurassic':
-        return 'Welcome1!'
-    return None
+@auth.verify_password
+def verify_password(name, password):
+    connection = sqlite3.connect('ads.db')
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM users where name=?", (name,))
+    connection.commit()
+    row = cursor.fetchone()
+
+    user = {
+        'id': row[0],
+        'name': row[1],
+        'password': row[2]
+    }
+
+    if check_password_hash(user.get('password'), password):
+        return user
+    else:
+        return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 @auth.error_handler
 def unauthorized():
     return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 class AdList(Resource):
-    #decorators = [auth.login_required]
-
     def get(self):
         connection = sqlite3.connect('ads.db')
         cursor = connection.cursor()

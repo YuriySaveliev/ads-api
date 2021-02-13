@@ -27,8 +27,6 @@ class User(Resource):
         cursor.execute("DELETE FROM users where id=?", (user_id,))
         connection.commit()
 
-        #abort_if_ad_doesnt_exist(ad_id)
-
         return '', 204
 
     def put(self, user_id):
@@ -48,8 +46,6 @@ class User(Resource):
             args['password'],
             user_id
         )
-    
-        #abort_if_ad_doesnt_exist(ad_id)
         
         cursor.execute("UPDATE users SET name=?, password=?, where id=?", user)
         connection.commit()
