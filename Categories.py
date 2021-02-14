@@ -3,7 +3,7 @@ import sqlite3
 
 class Categories(Resource):
     def get(self):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
         
         categories = []

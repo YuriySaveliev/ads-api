@@ -3,12 +3,13 @@ from flask_httpauth import HTTPBasicAuth
 from flask import make_response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+from config import DB_PATH
 
 auth = HTTPBasicAuth()
 
 class Ad(Resource):
     def get(self, ad_id):
-        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
         
         cursor.execute("SELECT * FROM ads where id=?", (ad_id,))
@@ -28,7 +29,7 @@ class Ad(Resource):
         return ad
 
     def delete(self, ad_id):
-        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
@@ -40,7 +41,7 @@ class Ad(Resource):
         return '', 204
 
     def put(self, ad_id):
-        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
@@ -53,6 +54,13 @@ class Ad(Resource):
         parser.add_argument('image_url')
         
         args = parser.parse_args()
+
+        if not args['title'] or not args['price']:
+            return make_response(jsonify({'error': 'Error', 'message': 'One or more fields is required'}), 400)
+        
+        if len(args['image_url']) > 10:
+            return make_response(jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
+        
         ad = (
             args['title'], 
             args['description'], 

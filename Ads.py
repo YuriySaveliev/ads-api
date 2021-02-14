@@ -4,12 +4,13 @@ from flask import make_response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import datetime
+from config import DB_PATH
 
 auth = HTTPBasicAuth()
 
 @auth.verify_password
 def verify_password(name, password):
-    connection = sqlite3.connect('ads.db')
+    connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
     
     cursor.execute("SELECT * FROM users where name=?", (name,))
@@ -33,7 +34,7 @@ def unauthorized():
 
 class AdList(Resource):
     def get(self):
-        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         ADS = []
@@ -59,7 +60,7 @@ class AdList(Resource):
         return ADS
 
     def post(self):
-        connection = sqlite3.connect('/home/jurassic987/ads-api/ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
@@ -71,6 +72,13 @@ class AdList(Resource):
         parser.add_argument('image_url')
 
         args = parser.parse_args()
+
+        if not args['title'] or not args['price']:
+            return make_response(jsonify({'error': 'Error', 'message': 'One or more fields is required'}), 400)
+
+        if len(args['image_url']) > 10:
+            return make_response(jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
+        
         ad = (
             args['title'], 
             args['description'], 
