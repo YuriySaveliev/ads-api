@@ -3,7 +3,7 @@ import sqlite3
 
 class User(Resource):
     def get(self, user_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
         
         cursor.execute("SELECT * FROM users where id=?", (user_id,))
@@ -19,7 +19,7 @@ class User(Resource):
         return user
 
     def delete(self, user_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         parser.add_argument('id')
@@ -30,7 +30,7 @@ class User(Resource):
         return '', 204
 
     def put(self, user_id):
-        connection = sqlite3.connect('ads.db')
+        connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
         parser = reqparse.RequestParser()
