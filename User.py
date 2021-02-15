@@ -1,5 +1,6 @@
 from flask_restful import reqparse, abort, Api, Resource
 import sqlite3
+from config import DB_PATH
 
 class User(Resource):
     def get(self, user_id):

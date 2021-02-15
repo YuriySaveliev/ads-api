@@ -58,7 +58,7 @@ class Ad(Resource):
         if not args['title'] or not args['price']:
             return make_response(jsonify({'error': 'Error', 'message': 'One or more fields is required'}), 400)
         
-        if len(args['image_url']) > 10:
+        if len(args['image_url']) > 256:
             return make_response(jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
         
         ad = (
@@ -79,7 +79,6 @@ class Ad(Resource):
             "description": args['description'], 
             "price": args['price'],
             "bids": args['bids'],
-            "create_date": args['create_date'],
             "image_url": args['image_url'],
         }
 

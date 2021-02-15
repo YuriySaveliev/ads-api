@@ -1,5 +1,5 @@
 import sqlite3
-form conig import DB_PATH
+from config import DB_PATH
 
 connection = sqlite3.connect(DB_PATH)
 cursor = connection.cursor()
@@ -11,7 +11,6 @@ cursor.execute("INSERT INTO ads VALUES (3, 'Ticket', 'Ticket to the ZOO', 50, 50
 
 cursor.execute("CREATE TABLE users(id integer not null primary key, name text, password text)")
 cursor.execute("INSERT INTO users VALUES (1, 'admin', 'test1234')")
-cursor.execute("INSERT INTO users VALUES(2, 'regular', 'qwerty1234')")
 
 connection.commit()
 connection.close()
