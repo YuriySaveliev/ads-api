@@ -89,7 +89,7 @@ def register_user():
         password,
         email,
     )
-    print(user)
+
     cursor.execute("INSERT INTO users(id, name, password, email) VALUES(?,?,?,?)", user)
     connection.commit()
 

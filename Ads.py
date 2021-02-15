@@ -76,7 +76,7 @@ class AdList(Resource):
         if not args['title'] or not args['price']:
             return make_response(jsonify({'error': 'Error', 'message': 'One or more fields is required'}), 400)
 
-        if len(args['image_url']) > 10:
+        if len(args['image_url']) > 256:
             return make_response(jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
         
         ad = (
@@ -91,4 +91,4 @@ class AdList(Resource):
         cursor.execute("INSERT INTO ads(title, description, price, bids, create_date, image_url) VALUES(?,?,?,?,?,?)", ad)
         connection.commit()
 
-        return cursor.lastrowid, 201
+        return ad, 201
