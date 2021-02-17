@@ -84,11 +84,21 @@ class AdList(Resource):
             args['description'], 
             args['price'],
             args['bids'],
-            datetime.datetime.now(),
+            datetime.datetime.now().isoformat(),
             args['image_url'],
         )
 
         cursor.execute("INSERT INTO ads(title, description, price, bids, create_date, image_url) VALUES(?,?,?,?,?,?)", ad)
         connection.commit()
+
+        ad = {
+                'id': cursor.lastrowid,
+                'title': args['title'], 
+                'description': args['description'], 
+                'price': args['price'],
+                'bids': args['bids'],
+                'create_date': ad[4],
+                'image_url': args['image_url']
+            }
 
         return ad, 201
