@@ -8,6 +8,7 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_httpauth import HTTPBasicAuth
 
 from config import DB_PATH
 
@@ -17,6 +18,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 CORS(app)
 api = Api(app)
+auth = HTTPBasicAuth()
 
 class AdModel(db.Model):
     __tablename__ = 'ads'
@@ -47,6 +49,25 @@ class CategoryModel(db.Model):
     if (not isAdExist):
         abort(404, message="Ad {} doesn't exist".format(ad_id))'''
 
+@auth.verify_password
+def verify_password(username, password):
+    if (username and password):
+        connection = sqlite3.connect(DB_PATH)
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT * FROM users where name=?", (username, ))
+        connection.commit()
+        row = cursor.fetchone()
+
+        user = {
+            'id': row[0],
+            'name': row[1],
+            'password': row[2]
+        }
+
+        if user['name'] == username and check_password_hash(user.get('password'), password):
+            return username
+
 @app.route('/')
 def index():
     return redirect('/ads')
@@ -73,6 +94,7 @@ def get_ads():
     return make_response(jsonify(res))
 
 @app.route('/ads', methods=['POST'])
+@auth.login_required
 def add_ad():
     data = request.get_json() or {}
 
@@ -107,6 +129,7 @@ def add_ad():
     return response
 
 @app.route('/ads/<int:id>', methods=['GET'])
+@auth.login_required
 def get_ad(id):
     ad = AdModel.query.get_or_404(id)
     result = {
@@ -123,6 +146,7 @@ def get_ad(id):
     return jsonify(result)
 
 @app.route('/ads/<int:id>', methods=['DELETE'])
+@auth.login_required
 def delete_ad(id):
     ad = AdModel.query.get(id)
     db.session.delete(ad)
@@ -133,6 +157,7 @@ def delete_ad(id):
     return response
 
 @app.route('/ads/<int:id>', methods=['PUT'])
+@auth.login_required
 def update_ad(id):
     ad = AdModel.query.get_or_404(id)
     data = request.get_json() or {}
