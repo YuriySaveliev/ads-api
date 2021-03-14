@@ -2,13 +2,12 @@ import sqlite3
 import uuid
 from datetime import datetime
 
-from flask import Flask, redirect, jsonify, request, make_response, url_for
-from flask_restful import abort, Api
+from flask import Flask, redirect, jsonify, request, make_response, abort
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import DB_PATH
 
@@ -17,7 +16,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ads.db'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 CORS(app)
-api = Api(app)
 auth = HTTPBasicAuth()
 
 class AdModel(db.Model):
@@ -39,15 +37,13 @@ class CategoryModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))
 
-'''def abort_if_ad_doesnt_exist(ad_id):
-    isAdExist = False
+class UserModel(db.Model):
+    __tablename__ = 'users'
 
-    for item in ADS:
-        if item['id'] == int(ad_id):
-            isAdExist = True
-    
-    if (not isAdExist):
-        abort(404, message="Ad {} doesn't exist".format(ad_id))'''
+    id = db.Column(db.String(128), primary_key=True)
+    name = db.Column(db.String(128))
+    password = db.Column(db.String(128))
+    email = db.Column(db.String(128))
 
 @auth.verify_password
 def verify_password(username, password):
@@ -75,7 +71,7 @@ def index():
 @app.route('/ads', methods=['GET'])
 def get_ads():
     ads = AdModel.query.all()
-    res = []
+    response = []
 
     for row in ads:
         ad = {
@@ -89,9 +85,9 @@ def get_ads():
             'user_id': row.user_id
         }
 
-        res.append(ad)
+        response.append(ad)
 
-    return make_response(jsonify(res))
+    return jsonify(response)
 
 @app.route('/ads', methods=['POST'])
 @auth.login_required
@@ -132,7 +128,7 @@ def add_ad():
 @auth.login_required
 def get_ad(id):
     ad = AdModel.query.get_or_404(id)
-    result = {
+    response = {
             'id': ad.id,
             'title': ad.title,
             'description': ad.description,
@@ -143,7 +139,7 @@ def get_ad(id):
             'user_id': ad.user_id
         }
 
-    return jsonify(result)
+    return jsonify(response)
 
 @app.route('/ads/<int:id>', methods=['DELETE'])
 @auth.login_required
@@ -201,7 +197,7 @@ def update_ad(id):
 @app.route('/ads/categories', methods=['GET'])
 def get_categories():
     categories = CategoryModel.query.all()
-    res = []
+    response = []
 
     for row in categories:
         category = {
@@ -209,9 +205,9 @@ def get_categories():
             'name': row.name
         }
 
-        res.append(category)
+        response.append(category)
 
-    return make_response(jsonify(res))
+    return jsonify(response)
 
 @app.route('/login', methods = ['POST'])
 def login_user():
