@@ -94,7 +94,7 @@ def get_ads():
     return make_response(jsonify(res))
 
 @app.route('/ads', methods=['POST'])
-@auth.login_required
+#@auth.login_required
 def add_ad():
     data = request.get_json() or {}
 
@@ -129,7 +129,7 @@ def add_ad():
     return response
 
 @app.route('/ads/<int:id>', methods=['GET'])
-@auth.login_required
+#@auth.login_required
 def get_ad(id):
     ad = AdModel.query.get_or_404(id)
     result = {
@@ -146,7 +146,7 @@ def get_ad(id):
     return jsonify(result)
 
 @app.route('/ads/<int:id>', methods=['DELETE'])
-@auth.login_required
+#@auth.login_required
 def delete_ad(id):
     ad = AdModel.query.get(id)
     db.session.delete(ad)
@@ -157,7 +157,7 @@ def delete_ad(id):
     return response
 
 @app.route('/ads/<int:id>', methods=['PUT'])
-@auth.login_required
+#@auth.login_required
 def update_ad(id):
     ad = AdModel.query.get_or_404(id)
     data = request.get_json() or {}
@@ -263,7 +263,7 @@ def register_user():
         return make_response(jsonify({'message': 'User already exists'}), 400)
     
     password = generate_password_hash(password)
-    id = str(uuid.uuid4())
+    id = str(uuid.uuid4())1
     user = (
         id,
         name,

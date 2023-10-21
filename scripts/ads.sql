@@ -1,6 +1,9 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
-CREATE TABLE ads(id integer not null primary key, title text, description text, price integer, bids integer, create_date text, image_url text, user_id integer, category_id integer);
+DROP TABLE IF EXISTS ads;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS users;
+CREATE TABLE  ads(id integer not null primary key, title text, description text, price integer, bids integer, create_date text, image_url text, user_id integer, category_id integer);
 INSERT INTO ads VALUES(1,'GeForce 1060','GDDR5',150,100,'2020-02-01 23:14:27.591486',NULL,2,2);
 INSERT INTO ads VALUES(2,'Bike','Yamaha',5000,4000,'2020-08-01 13:14:27.591486',NULL,2,1);
 INSERT INTO ads VALUES(3,'Ticket','Ticket to the ZOO',50,50,'2020-08-21 13:14:27.591486',NULL,3,2);
