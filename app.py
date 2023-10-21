@@ -263,7 +263,7 @@ def register_user():
         return make_response(jsonify({'message': 'User already exists'}), 400)
     
     password = generate_password_hash(password)
-    id = str(uuid.uuid4())1
+    id = str(uuid.uuid4())
     user = (
         id,
         name,
