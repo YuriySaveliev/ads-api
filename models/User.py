@@ -2,18 +2,19 @@ from flask_restful import reqparse, abort, Api, Resource
 import sqlite3
 from config import DB_PATH
 
+
 class User(Resource):
     def get(self, user_id):
         connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
-        
+
         cursor.execute("SELECT * FROM users where id=?", (user_id,))
         connection.commit()
         row = cursor.fetchone()
 
         user = {
             'id': row[0],
-            'name': row[1], 
+            'name': row[1],
             'password': row[2]
         }
 
@@ -24,7 +25,7 @@ class User(Resource):
         cursor = connection.cursor()
 
         parser.add_argument('id')
-        
+
         cursor.execute("DELETE FROM users where id=?", (user_id,))
         connection.commit()
 
@@ -42,19 +43,19 @@ class User(Resource):
 
         args = parser.parse_args()
         user = (
-            args['id'], 
-            args['name'], 
+            args['id'],
+            args['name'],
             args['password'],
             user_id
         )
-        
+
         cursor.execute("UPDATE users SET name=?, password=?, where id=?", user)
         connection.commit()
 
         user = {
             "id": user_id,
-            "name": args['name'], 
+            "name": args['name'],
             "password": args['password']
         }
 
-        return user, 201       
+        return user, 201

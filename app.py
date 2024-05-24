@@ -20,6 +20,7 @@ CORS(app)
 api = Api(app)
 auth = HTTPBasicAuth()
 
+
 class AdModel(db.Model):
     __tablename__ = 'ads'
 
@@ -33,11 +34,13 @@ class AdModel(db.Model):
     user_id = db.Column(db.Integer)
     category_id = db.Column(db.Integer)
 
+
 class CategoryModel(db.Model):
     __tablename__ = 'categories'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))
+
 
 '''def abort_if_ad_doesnt_exist(ad_id):
     isAdExist = False
@@ -49,13 +52,14 @@ class CategoryModel(db.Model):
     if (not isAdExist):
         abort(404, message="Ad {} doesn't exist".format(ad_id))'''
 
+
 @auth.verify_password
 def verify_password(username, password):
-    if (username and password):
+    if username and password:
         connection = sqlite3.connect(DB_PATH)
         cursor = connection.cursor()
 
-        cursor.execute("SELECT * FROM users where name=?", (username, ))
+        cursor.execute("SELECT * FROM users where name=?", (username,))
         connection.commit()
         row = cursor.fetchone()
 
@@ -68,9 +72,11 @@ def verify_password(username, password):
         if user['name'] == username and check_password_hash(user.get('password'), password):
             return username
 
+
 @app.route('/')
 def index():
     return redirect('/ads')
+
 
 @app.route('/ads', methods=['GET'])
 def get_ads():
@@ -93,8 +99,9 @@ def get_ads():
 
     return make_response(jsonify(res))
 
+
 @app.route('/ads', methods=['POST'])
-#@auth.login_required
+# @auth.login_required
 def add_ad():
     data = request.get_json() or {}
 
@@ -102,13 +109,16 @@ def add_ad():
         return make_response(jsonify({'error': 'Error', 'message': 'One or more fields is required'}), 400)
 
     if len(data['image_url']) > 256:
-        return make_response(jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
+        return make_response(
+            jsonify({'error': 'Image error', 'message': 'Image url should contain less than 256 characters'}), 400)
 
     data['create_date'] = datetime.now().isoformat()
     data['user_id'] = None
     data['category_id'] = None
 
-    ad = AdModel(title=data['title'], description=data['description'], price=data['price'], bids=data['bids'], create_date=data['create_date'], image_url=data['image_url'], user_id=data['user_id'], category_id=data['category_id'])
+    ad = AdModel(title=data['title'], description=data['description'], price=data['price'], bids=data['bids'],
+                 create_date=data['create_date'], image_url=data['image_url'], user_id=data['user_id'],
+                 category_id=data['category_id'])
     db.session.add(ad)
     db.session.commit()
     created_ad = {
@@ -124,29 +134,31 @@ def add_ad():
     }
     response = jsonify(created_ad)
     response.status_code = 201
-    #response.headers['Location'] = url_for('get_ad', id=ad.id)
+    # response.headers['Location'] = url_for('get_ad', id=ad.id)
 
     return response
 
+
 @app.route('/ads/<int:id>', methods=['GET'])
-#@auth.login_required
+# @auth.login_required
 def get_ad(id):
     ad = AdModel.query.get_or_404(id)
     result = {
-            'id': ad.id,
-            'title': ad.title,
-            'description': ad.description,
-            'price': ad.price,
-            'bids': ad.bids,
-            'create_date': ad.create_date,
-            'image_url': ad.image_url,
-            'user_id': ad.user_id
-        }
+        'id': ad.id,
+        'title': ad.title,
+        'description': ad.description,
+        'price': ad.price,
+        'bids': ad.bids,
+        'create_date': ad.create_date,
+        'image_url': ad.image_url,
+        'user_id': ad.user_id
+    }
 
     return jsonify(result)
 
+
 @app.route('/ads/<int:id>', methods=['DELETE'])
-#@auth.login_required
+# @auth.login_required
 def delete_ad(id):
     ad = AdModel.query.get(id)
     db.session.delete(ad)
@@ -156,8 +168,9 @@ def delete_ad(id):
     response.status_code = 201
     return response
 
+
 @app.route('/ads/<int:id>', methods=['PUT'])
-#@auth.login_required
+# @auth.login_required
 def update_ad(id):
     ad = AdModel.query.get_or_404(id)
     data = request.get_json() or {}
@@ -198,6 +211,7 @@ def update_ad(id):
     db.session.commit()
     return jsonify(updated_ad)
 
+
 @app.route('/ads/categories', methods=['GET'])
 def get_categories():
     categories = CategoryModel.query.all()
@@ -213,24 +227,25 @@ def get_categories():
 
     return make_response(jsonify(res))
 
-@app.route('/login', methods = ['POST'])
+
+@app.route('/login', methods=['POST'])
 def login_user():
     name = request.json.get('name')
     password = request.json.get('password')
 
     if name is None or password is None:
         abort(400)
-    
+
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
-    
+
     cursor.execute("SELECT * FROM users where name=?", (name,))
     connection.commit()
     row = cursor.fetchone()
 
     if row is None:
         return make_response(jsonify({'message': 'Unauthorized access'}), 403)
-    
+
     user = {
         'id': row[0],
         'name': row[1],
@@ -242,26 +257,27 @@ def login_user():
     else:
         return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
-@app.route('/register', methods = ['POST'])
+
+@app.route('/register', methods=['POST'])
 def register_user():
     name = request.json.get('name')
     password = request.json.get('password')
     email = request.json.get('email')
-    verify_password = request.json.get('verify_password')
+    verify_password_value = request.json.get('verify_password')
 
-    if name is None or password is None or email is None or verify_password is None:
+    if name is None or password is None or email is None or verify_password_value is None:
         abort(400)
 
     connection = sqlite3.connect(DB_PATH)
     cursor = connection.cursor()
-    
+
     cursor.execute("SELECT * FROM users where name=?", (name,))
     connection.commit()
     row = cursor.fetchone()
 
     if row is not None:
         return make_response(jsonify({'message': 'User already exists'}), 400)
-    
+
     password = generate_password_hash(password)
     id = str(uuid.uuid4())
     user = (
@@ -275,6 +291,7 @@ def register_user():
     connection.commit()
 
     return make_response(jsonify({'name': name}), 400)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
